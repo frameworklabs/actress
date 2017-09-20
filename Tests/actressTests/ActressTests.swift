@@ -35,6 +35,8 @@ class ActorTests: XCTestCase {
     }
 }
 
+// MARK: - EchoActor
+
 protocol EchoBehaviour {
     func echo(_ text: String, queue: DispatchQueue, cont: @escaping (String) -> Void)
 }
@@ -43,14 +45,20 @@ protocol QuietBehaviour {
     func speakUp(queue: DispatchQueue, cont: @escaping (String) -> Void)
 }
 
-class EchoActor: Actor, EchoBehaviour {
+class EchoActor: Actor, EchoBehaviour, QuietBehaviour {
+
+    // MARK: Properties
 
     let echoBehaviour = StandardBehaviour<EchoBehaviour>("echo(_:queue:cont:)")
     let quietBehaviour = StandardBehaviour<QuietBehaviour>("speakUp(queue:cont:)")
 
+    // MARK: Construction
+
     override init(name: String) {
         super.init(name: name)
     }
+
+    // MARK: Actor methods
 
     func echo(_ text: String, queue: DispatchQueue, cont: @escaping (String) -> Void) {
         actorMethod(#function, queue: queue, cont: cont) { cont in
@@ -76,6 +84,8 @@ class EchoActor: Actor, EchoBehaviour {
         }
     }
 }
+
+// MARK: - Helpers
 
 func isOnQueue(_ expectedQueue: DispatchQueue) -> Bool {
 
