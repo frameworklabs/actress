@@ -42,7 +42,7 @@ open class Actor {
     ///
     /// - Note: See Test for usage
     /// - Note: In the future with async/await, the compiler should insert some equivalent code instead.
-    public func actorMethod<T>(_ method: StaticString, queue: DispatchQueue, cont: @escaping (T) -> Void, messageHandler: @escaping (@escaping (T) -> Void) -> Void) {
+    public func actorMethod<T>(_ method: StaticString, queue: DispatchQueue, cont: @escaping Continuation<T>, messageHandler: @escaping (@escaping Continuation<T>) -> Void) {
         actorQueue.async {
             self.startActivity(method: method) {
                 messageHandler { t in
@@ -62,7 +62,7 @@ open class Actor {
     ///
     /// - Note: See Test for usage
     /// - Note: In the future with async/await, the compiler should insert some equivalent code instead.
-    public func onewayActorMethod(_ method: StaticString, messageHandler: @escaping (@escaping () -> Void) -> Void) {
+    public func onewayActorMethod(_ method: StaticString, messageHandler: @escaping (@escaping Continuation<Void>) -> Void) {
         actorQueue.async {
             self.startActivity(method: method) {
                 messageHandler {
@@ -76,7 +76,7 @@ open class Actor {
     ///
     /// To prevent deadlocks, some actor methods should be able to run outside of the activities stream - but still
     /// on the queue of the actor.
-    public func interleavedActorMethod<T>(queue: DispatchQueue, cont: @escaping (T) -> Void, messageHandler: @escaping (@escaping (T) -> Void) -> Void) {
+    public func interleavedActorMethod<T>(queue: DispatchQueue, cont: @escaping Continuation<T>, messageHandler: @escaping (@escaping Continuation<T>) -> Void) {
         actorQueue.async {
             messageHandler { t in
                 queue.async {
@@ -174,3 +174,7 @@ public struct StandardBehaviour<T>: Behaviour {
         self.methods = Set(methods)
     }
 }
+
+// MARK: - Helpers
+
+public typealias Continuation<T> = (T) -> Void

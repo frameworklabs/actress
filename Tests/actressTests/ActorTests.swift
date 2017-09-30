@@ -57,11 +57,11 @@ class ActorTests: XCTestCase {
 // MARK: - EchoActor
 
 protocol EchoBehaviour {
-    func echo(_ text: String, queue: DispatchQueue, cont: @escaping (String) -> Void)
+    func echo(_ text: String, queue: DispatchQueue, cont: @escaping Continuation<String>)
 }
 
 protocol QuietBehaviour {
-    func speakUp(queue: DispatchQueue, cont: @escaping (String) -> Void)
+    func speakUp(queue: DispatchQueue, cont: @escaping Continuation<String>)
 }
 
 class EchoActor: Actor, EchoBehaviour, QuietBehaviour {
@@ -73,7 +73,7 @@ class EchoActor: Actor, EchoBehaviour, QuietBehaviour {
 
     // MARK: Actor methods
 
-    func echo(_ text: String, queue: DispatchQueue, cont: @escaping (String) -> Void) {
+    func echo(_ text: String, queue: DispatchQueue, cont: @escaping Continuation<String>) {
         actorMethod(#function, queue: queue, cont: cont) { cont in
 
             XCTAssertTrue(isOnQueue(self.actorQueue))
@@ -86,7 +86,7 @@ class EchoActor: Actor, EchoBehaviour, QuietBehaviour {
         }
     }
 
-    func speakUp(queue: DispatchQueue, cont: @escaping (String) -> Void) {
+    func speakUp(queue: DispatchQueue, cont: @escaping Continuation<String>) {
         actorMethod(#function, queue: queue, cont: cont) { cont in
 
             XCTAssertTrue(isOnQueue(self.actorQueue))
@@ -111,11 +111,11 @@ class Adder: Actor {
     func add(_ delta: Int) {
         onewayActorMethod(#function) { cont in
             self.value += delta
-            cont()
+            cont(())
         }
     }
     
-    func getSum(queue: DispatchQueue, cont: @escaping (Int) -> Void) {
+    func getSum(queue: DispatchQueue, cont: @escaping Continuation<Int>) {
         actorMethod(#function, queue: queue, cont: cont) { cont in
             cont(self.value)
         }
@@ -124,7 +124,7 @@ class Adder: Actor {
     func reset() {
         onewayActorMethod(#function) { cont in
             self.value = 0
-            cont()
+            cont(())
         }
     }
 }
