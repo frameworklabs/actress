@@ -54,12 +54,29 @@ open class Actor {
             }
         }
     }
+    
+    /// Wrapper for bodies of actor methods which start an activity but don't return values.
+    ///
+    /// While one `actorMethod` is active, other activities will be
+    /// blocked from running to ensure strict serial execution of activities.
+    ///
+    /// - Note: See Test for usage
+    /// - Note: In the future with async/await, the compiler should insert some equivalent code instead.
+    public func onewayActorMethod(_ method: StaticString, messageHandler: @escaping (@escaping () -> Void) -> Void) {
+        actorQueue.async {
+            self.startActivity(method: method) {
+                messageHandler {
+                    self.finishActivity()
+                }
+            }
+        }
+    }
 
     /// Wrapper for bodies of actor methods which should not start an activity.
     ///
     /// To prevent deadlocks, some actor methods should be able to run outside of the activities stream - but still
     /// on the queue of the actor.
-    open func interleavedActorMethod<T>(queue: DispatchQueue, cont: @escaping (T) -> Void, messageHandler: @escaping (@escaping (T) -> Void) -> Void) {
+    public func interleavedActorMethod<T>(queue: DispatchQueue, cont: @escaping (T) -> Void, messageHandler: @escaping (@escaping (T) -> Void) -> Void) {
         actorQueue.async {
             messageHandler { t in
                 queue.async {
@@ -72,7 +89,7 @@ open class Actor {
     // MARK: Setting Behaviour
 
     /// Activate the given `behaviour` - this will clear the behaviour stack first.
-    open func become(_ behaviour: Behaviour?) {
+    public func become(_ behaviour: Behaviour?) {
         behaviourStack.removeAll()
         if let behaviour = behaviour {
             push(behaviour)
@@ -80,12 +97,12 @@ open class Actor {
     }
 
     /// Pushes and activates `behaviour`.
-    open func push(_ behaviour: Behaviour) {
+    public func push(_ behaviour: Behaviour) {
         behaviourStack.append(behaviour)
     }
 
     /// Pops the most recently pushed behaviour.
-    open func popBehaviour() {
+    public func popBehaviour() {
         behaviourStack.removeLast()
     }
 
@@ -147,13 +164,13 @@ public struct StandardBehaviour<T>: Behaviour {
     public let methods: Set<String>
 
     /// Constructs the `Behaviour` by extracting the methods from the generic type T.
-    init() {
+    public init() {
         // TODO: Should fill `methods` by reflecting over T
         self.methods = []
     }
 
     /// Constructs a `Behaviour` by providing the method signatures explicity.
-    init(_ methods: String...) {
+    public init(_ methods: String...) {
         self.methods = Set(methods)
     }
 }

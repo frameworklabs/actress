@@ -1,4 +1,4 @@
-@testable import Actress
+@testable import actress
 import XCTest
 
 class ActorTests: XCTestCase {
@@ -31,7 +31,26 @@ class ActorTests: XCTestCase {
                 XCTAssertEqual(str, "yo")
             }
         }
-        waitForExpectations(timeout: 700, handler: nil)
+        waitForExpectations(timeout: 7, handler: nil)
+    }
+    
+    func testOneway() {
+        let expectation = self.expectation(description: #function)
+        
+        let a = Adder(name: "a")
+        
+        a.add(3)
+        a.getSum(queue: DispatchQueue.main) { value in
+            XCTAssertEqual(value, 3)
+            
+            a.reset()
+            a.getSum(queue: DispatchQueue.main) { value in
+                XCTAssertEqual(value, 0)
+                
+                expectation.fulfill()
+            }
+        }
+        waitForExpectations(timeout: 7, handler: nil)
     }
 }
 
@@ -51,12 +70,6 @@ class EchoActor: Actor, EchoBehaviour, QuietBehaviour {
 
     let echoBehaviour = StandardBehaviour<EchoBehaviour>("echo(_:queue:cont:)")
     let quietBehaviour = StandardBehaviour<QuietBehaviour>("speakUp(queue:cont:)")
-
-    // MARK: Construction
-
-    override init(name: String) {
-        super.init(name: name)
-    }
 
     // MARK: Actor methods
 
@@ -81,6 +94,37 @@ class EchoActor: Actor, EchoBehaviour, QuietBehaviour {
             self.popBehaviour()
 
             cont("yo")
+        }
+    }
+}
+
+// MARK: - One Way
+
+class Adder: Actor {
+    
+    // MARK: Properties
+
+    private var value = 0
+    
+    // MARK: Actor methods
+
+    func add(_ delta: Int) {
+        onewayActorMethod(#function) { cont in
+            self.value += delta
+            cont()
+        }
+    }
+    
+    func getSum(queue: DispatchQueue, cont: @escaping (Int) -> Void) {
+        actorMethod(#function, queue: queue, cont: cont) { cont in
+            cont(self.value)
+        }
+    }
+    
+    func reset() {
+        onewayActorMethod(#function) { cont in
+            self.value = 0
+            cont()
         }
     }
 }
