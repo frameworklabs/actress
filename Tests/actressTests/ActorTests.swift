@@ -8,14 +8,14 @@ class ActorTests: XCTestCase {
 
         let e = EchoActor(name: "e")
 
-        e.echo("shutup", queue: DispatchQueue.main) { str in
+        e.echo("shutup", queue: .main) { str in
 
-            XCTAssertTrue(isOnQueue(DispatchQueue.main))
+            XCTAssertTrue(isOnQueue(.main))
             XCTAssertEqual(str, "shutup")
 
             var count = 0
 
-            e.echo("hi", queue: DispatchQueue.main) { str in
+            e.echo("hi", queue: .main) { str in
                 count += 1
 
                 XCTAssertEqual(count, 2)
@@ -23,10 +23,10 @@ class ActorTests: XCTestCase {
 
                 expectation.fulfill()
             }
-            e.speakUp(queue: DispatchQueue.main) { str in
+            e.speakUp(queue: .main) { str in
                 count += 1
 
-                XCTAssertTrue(isOnQueue(DispatchQueue.main))
+                XCTAssertTrue(isOnQueue(.main))
                 XCTAssertEqual(count, 1)
                 XCTAssertEqual(str, "yo")
             }
@@ -40,11 +40,11 @@ class ActorTests: XCTestCase {
         let a = Adder(name: "a")
         
         a.add(3)
-        a.getSum(queue: DispatchQueue.main) { value in
+        a.getSum(queue: .main) { value in
             XCTAssertEqual(value, 3)
             
             a.reset()
-            a.getSum(queue: DispatchQueue.main) { value in
+            a.getSum(queue: .main) { value in
                 XCTAssertEqual(value, 0)
                 
                 expectation.fulfill()

@@ -26,6 +26,9 @@ open class Actor {
     /// The serial `DispatchQueue` of this actor instance.
     public let actorQueue: DispatchQueue
 
+    /// Can hold disposable objects for this actor.
+    public let disposeBag = DisposeBag()
+    
     // MARK: Construction
 
     /// Constructs an Actor with a name used for the serial Dispatch queue.
